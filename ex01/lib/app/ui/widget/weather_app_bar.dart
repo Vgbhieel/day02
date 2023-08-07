@@ -1,10 +1,16 @@
+import 'dart:async';
+
+import 'package:ex00/app/domain/bloc/event/search_place_event.dart';
+import 'package:ex00/app/domain/bloc/search_place_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WeatherAppBar extends StatelessWidget {
   final Function(String) _onSearch;
   final Function() _onGeolocationClicked;
+  Timer? _debounceTimer;
 
-  const WeatherAppBar({
+  WeatherAppBar({
     super.key,
     required onSearch,
     required onGeolocationClicked,
@@ -27,14 +33,17 @@ class WeatherAppBar extends StatelessWidget {
               Expanded(
                 flex: 1,
                 child: TextField(
-                  onSubmitted: _onSearch,
+                  onChanged: (query) => _onSearchChanged(context, query),
+                  onSubmitted: (query) => _onSearchChanged(context, query),
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: theme.colorScheme.background,
                     enabledBorder: InputBorder.none,
                     icon: Icon(
                       Icons.search,
                       color: theme.colorScheme.primary,
                     ),
-                    hintText: "Search X location...",
+                    hintText: "Search location...",
                   ),
                 ),
               ),
@@ -63,5 +72,14 @@ class WeatherAppBar extends StatelessWidget {
         ),
       )
     ]);
+  }
+
+  void _onSearchChanged(BuildContext context, String query) {
+    _debounceTimer?.cancel();
+
+    // Start a new timer to trigger the search logic after 500 milliseconds of inactivity
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      context.read<SearchPlaceBloc>().add(SearchPlaceWithQuery(query: query));
+    });
   }
 }

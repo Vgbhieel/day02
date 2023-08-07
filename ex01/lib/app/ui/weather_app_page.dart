@@ -1,5 +1,6 @@
 import 'package:ex00/app/domain/bloc/event/weather_app_event.dart';
 import 'package:ex00/app/domain/bloc/location_bloc.dart';
+import 'package:ex00/app/domain/bloc/search_place_bloc.dart';
 import 'package:ex00/app/domain/bloc/state/wheather_app_state.dart';
 import 'package:ex00/app/ui/widget/weather_app_bar.dart';
 import 'package:ex00/app/ui/widget/weather_bottom_navigation_bar.dart';
@@ -30,12 +31,18 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
     return DefaultTabController(
         length: 3,
         child: Scaffold(
-          appBar: WeatherAppBar(
-            onSearch: _onSearch,
-            onGeolocationClicked: () {
-              context.read<LocationBloc>().add(FetchLocation());
-            },
-          ).build(context),
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(56),
+            child: BlocProvider(
+              create: (context) => SearchPlaceBloc(),
+              child: WeatherAppBar(
+                onSearch: _onSearch,
+                onGeolocationClicked: () {
+                  context.read<LocationBloc>().add(FetchLocation());
+                },
+              ),
+            ),
+          ),
           body: TabBarView(
             children: [
               BlocBuilder<LocationBloc, WeatherAppState>(
