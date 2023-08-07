@@ -1,6 +1,11 @@
-import 'package:ex00/app/ui/widget/wheather_app_bar.dart';
-import 'package:ex00/app/ui/widget/wheather_bottom_navigation_bar.dart';
+import 'package:ex00/app/domain/bloc/event/weather_app_event.dart';
+import 'package:ex00/app/domain/bloc/location_bloc.dart';
+import 'package:ex00/app/domain/bloc/state/wheather_app_state.dart';
+import 'package:ex00/app/ui/widget/weather_app_bar.dart';
+import 'package:ex00/app/ui/widget/weather_bottom_navigation_bar.dart';
+import 'package:ex00/app/ui/widget/weather_category_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WeatherAppPage extends StatefulWidget {
   const WeatherAppPage({super.key});
@@ -10,48 +15,50 @@ class WeatherAppPage extends StatefulWidget {
 }
 
 class _WeatherAppPageState extends State<WeatherAppPage> {
-  String _searchText = "";
-
   void _onSearch(String searchText) {
-    setState(() {
-      _searchText = searchText;
-    });
+    // TODO
+  }
+
+  @override
+  void dispose() {
+    context.read<LocationBloc>().close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-
     return DefaultTabController(
         length: 3,
         child: Scaffold(
-          appBar: WheatherAppBar(
+          appBar: WeatherAppBar(
             onSearch: _onSearch,
-            onGeolocationClicked: () => _onSearch("Geolocation"),
+            onGeolocationClicked: () {
+              context.read<LocationBloc>().add(FetchLocation());
+            },
           ).build(context),
           body: TabBarView(
             children: [
-              Center(
-                child: Text(
-                  "Currently\n$_searchText",
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.displayLarge,
-                ),
-              ),
-              Center(
-                child: Text(
-                  "Today\n$_searchText",
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.displayLarge,
-                ),
-              ),
-              Center(
-                child: Text(
-                  "Weekly\n$_searchText",
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.displayLarge,
-                ),
-              ),
+              BlocBuilder<LocationBloc, WeatherAppState>(
+                  builder: (context, state) {
+                return WeatherCategoryPage(
+                  state: state,
+                  categoryText: "Currently",
+                );
+              }),
+              BlocBuilder<LocationBloc, WeatherAppState>(
+                  builder: (context, state) {
+                return WeatherCategoryPage(
+                  state: state,
+                  categoryText: "Today",
+                );
+              }),
+              BlocBuilder<LocationBloc, WeatherAppState>(
+                  builder: (context, state) {
+                return WeatherCategoryPage(
+                  state: state,
+                  categoryText: "Weekly",
+                );
+              })
             ],
           ),
           bottomNavigationBar: const WeatherBottomNavigationBar(),

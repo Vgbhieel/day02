@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class WheatherAppBar extends StatelessWidget {
+class WeatherAppBar extends StatelessWidget {
   final Function(String) _onSearch;
   final Function() _onGeolocationClicked;
 
-  const WheatherAppBar({
+  const WeatherAppBar({
     super.key,
     required onSearch,
     required onGeolocationClicked,
