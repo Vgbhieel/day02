@@ -30,27 +30,45 @@ class SearchPlaceBloc extends Bloc<SearchPlaceEvent, SearchPlaceState> {
 
     var decodedResponse =
         (jsonDecode(utf8.decode(response.bodyBytes)) as Map)["results"];
-    var result = decodedResponse.map((e) {
-      String name = e["name"] as String;
-      String country = e["country"] as String;
-      String? region = e["admin1"] as String?;
-      String title;
+    List<Map<String?, dynamic>> list =
+        List<Map<String?, dynamic>>.from(decodedResponse);
 
-      if (region != null) {
-        title = "$name, $region, $country";
-      } else {
-        title = name;
-      }
+    var result = list
+        .map(
+          (e) => _transformJson(e),
+        )
+        .toList();
 
-      Place place = Place(
-        latitude: e["latitude"] as double,
-        longitude: e["longitude"] as double,
-      );
-      return {
-        title: place,
-      };
+    emit(SearchSuccessState(data: result));
+  }
+
+  Map<String, Place> _transformJson(e) {
+    String name = e["name"] as String;
+    String country = e["country"] as String;
+    String? region = e["admin1"] as String?;
+    String? regionComplement = e["admin2"] as String?;
+    String title;
+
+    if (region != null) {
+      title = "$name, ${_getRegionData(region, regionComplement)}, $country";
+    } else {
+      title = name;
+    }
+
+    Place place = Place(
+      latitude: e["latitude"] as double,
+      longitude: e["longitude"] as double,
+    );
+    return Map.castFrom({
+      title: place,
     });
+  }
 
-    emit(SearchSuccessState(data: result.toList()));
+  String _getRegionData(String region, String? regionComplement) {
+    if (regionComplement != null) {
+      return "$region, $regionComplement";
+    } else {
+      return region;
+    }
   }
 }
