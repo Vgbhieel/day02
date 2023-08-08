@@ -1,12 +1,9 @@
-import 'package:ex00/app/domain/bloc/event/weather_app_event.dart';
-import 'package:ex00/app/domain/bloc/location_bloc.dart';
-import 'package:ex00/app/domain/bloc/search_place_bloc.dart';
-import 'package:ex00/app/domain/bloc/state/wheather_app_state.dart';
+import 'package:ex00/app/domain/controllers/get_location_controller.dart';
+import 'package:ex00/app/domain/models/place.dart';
 import 'package:ex00/app/ui/widget/weather_app_bar.dart';
 import 'package:ex00/app/ui/widget/weather_bottom_navigation_bar.dart';
 import 'package:ex00/app/ui/widget/weather_category_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WeatherAppPage extends StatefulWidget {
   const WeatherAppPage({super.key});
@@ -16,14 +13,30 @@ class WeatherAppPage extends StatefulWidget {
 }
 
 class _WeatherAppPageState extends State<WeatherAppPage> {
-  void _onSearch(String searchText) {
-    // TODO
-  }
+  late GetLocationController controller;
+  String _searchText = '';
+  bool _locationError = false;
 
   @override
-  void dispose() {
-    context.read<LocationBloc>().close();
-    super.dispose();
+  void initState() {
+    controller = GetLocationController(
+      onLocationGetted: (local) {
+        setState(() {
+          _searchText = local.latitude.toString();
+          _locationError = false;
+        });
+      },
+      onPermissionDenied: () {
+        setState(() {
+          _locationError = true;
+        });
+      },
+    );
+    super.initState();
+  }
+
+  void _onSearch(Place result) {
+    // TODO
   }
 
   @override
@@ -33,42 +46,46 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(56),
-            child: BlocProvider(
-              create: (context) => SearchPlaceBloc(),
-              child: WeatherAppBar(
-                onSearch: _onSearch,
-                onGeolocationClicked: () {
-                  context.read<LocationBloc>().add(FetchLocation());
-                },
-              ),
+            child: WeatherAppBar(
+              onSearch: _onSearch,
+              onGeolocationClicked: () {
+                controller.fetchUserLocation();
+              },
             ),
           ),
           body: TabBarView(
-            children: [
-              BlocBuilder<LocationBloc, WeatherAppState>(
-                  builder: (context, state) {
-                return WeatherCategoryPage(
-                  state: state,
-                  categoryText: "Currently",
-                );
-              }),
-              BlocBuilder<LocationBloc, WeatherAppState>(
-                  builder: (context, state) {
-                return WeatherCategoryPage(
-                  state: state,
-                  categoryText: "Today",
-                );
-              }),
-              BlocBuilder<LocationBloc, WeatherAppState>(
-                  builder: (context, state) {
-                return WeatherCategoryPage(
-                  state: state,
-                  categoryText: "Weekly",
-                );
-              })
-            ],
+            children: _getBodyWidgets(_locationError, context),
           ),
           bottomNavigationBar: const WeatherBottomNavigationBar(),
         ));
+  }
+
+  List<Widget> _getBodyWidgets(bool isError, BuildContext context) {
+    if (isError) {
+      return List.generate(3, (index) {
+        return Center(
+          child: Text(
+            "Geolocation is not available, please enable it in your app settings.",
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .displayLarge
+                ?.copyWith(color: Theme.of(context).colorScheme.error),
+          ),
+        );
+      });
+    } else {
+      return <Widget>[
+        WeatherCategoryPage(
+          categoryText: "Currently\n$_searchText",
+        ),
+        WeatherCategoryPage(
+          categoryText: "Today\n$_searchText",
+        ),
+        WeatherCategoryPage(
+          categoryText: "Weekly\n$_searchText",
+        ),
+      ];
+    }
   }
 }

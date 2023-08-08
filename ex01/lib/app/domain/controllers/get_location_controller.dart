@@ -1,17 +1,15 @@
-import 'package:bloc/bloc.dart';
-import 'package:ex00/app/domain/bloc/event/weather_app_event.dart';
-import 'package:ex00/app/domain/bloc/state/wheather_app_state.dart';
 import 'package:location/location.dart';
+import 'package:ex00/app/domain/models/local.dart';
 
-class LocationBloc extends Bloc<WeatherAppEvent, WeatherAppState> {
-  LocationBloc() : super(InitialState()) {
-    on<FetchLocation>(_onFetchUserLocation);
-  }
+class GetLocationController {
+  final Function() onPermissionDenied;
+  final Function(Local) onLocationGetted;
+  GetLocationController({
+    required this.onPermissionDenied,
+    required this.onLocationGetted,
+  });
 
-  Future<void> _onFetchUserLocation(
-    WeatherAppEvent event,
-    Emitter<WeatherAppState> emit,
-  ) async {
+  fetchUserLocation() async {
     Location location = Location();
 
     bool serviceEnabled;
@@ -22,7 +20,7 @@ class LocationBloc extends Bloc<WeatherAppEvent, WeatherAppState> {
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
       if (!serviceEnabled) {
-        return emit(PermissionDeniedState());
+        return onPermissionDenied.call();
       }
     }
 
@@ -30,11 +28,14 @@ class LocationBloc extends Bloc<WeatherAppEvent, WeatherAppState> {
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
       if (permissionGranted != PermissionStatus.granted) {
-        return emit(PermissionDeniedState());
+        return onPermissionDenied.call();
       }
     }
 
     locationData = await location.getLocation();
-    emit(LocationGettedState(data: locationData.altitude.toString()));
+    return onLocationGetted.call(Local(
+      latitude: locationData.latitude!,
+      longitude: locationData.longitude!,
+    ));
   }
 }

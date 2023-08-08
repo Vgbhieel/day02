@@ -1,10 +1,8 @@
-class Place {
-  final String title;
+class Local {
   final double latitude;
   final double longitude;
 
-  Place({
-    required this.title,
+  Local({
     required this.latitude,
     required this.longitude,
   });
