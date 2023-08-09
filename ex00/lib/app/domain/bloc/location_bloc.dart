@@ -35,6 +35,7 @@ class LocationBloc extends Bloc<WeatherAppEvent, WeatherAppState> {
     }
 
     locationData = await location.getLocation();
-    emit(LocationGettedState(data: locationData.altitude.toString()));
+    emit(LocationGettedState(
+        data: "${locationData.latitude} ${locationData.longitude}"));
   }
 }

@@ -6,12 +6,12 @@ import 'package:ex00/app/ui/widget/weather_place_search_autocomplete.dart';
 import 'package:flutter/material.dart';
 
 class WeatherPlaceSearcher extends StatefulWidget {
-  final Function(Place suggestion) _onSuggestionSelected;
+  final Function(Place suggestion) _onPlaceSelected;
 
   const WeatherPlaceSearcher({
     super.key,
-    required Function(Place) onSuggestionSelected,
-  }) : _onSuggestionSelected = onSuggestionSelected;
+    required Function(Place) onPlaceSelected,
+  }) : _onPlaceSelected = onPlaceSelected;
 
   @override
   State<WeatherPlaceSearcher> createState() => _WeatherPlaceSearcherState();
@@ -25,19 +25,27 @@ class _WeatherPlaceSearcherState extends State<WeatherPlaceSearcher> {
   @override
   void initState() {
     controller = SearchPlaceController(
-      onSearchSuccess: _onSearchSuccess,
-      onSearchError: _onSearchError,
-    );
+        onSuggestionsSuccess: _onSuggestionsSuccess,
+        onSuggestionsError: _onSuggestionsError,
+        onSearchSuccess: widget._onPlaceSelected,
+        onSearchError: () {
+          final snackBar = SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            content: Text('Ops, something went wrong. Please try again.',
+                style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        });
     super.initState();
   }
 
-  void _onSearchSuccess(List<Place> result) {
+  void _onSuggestionsSuccess(List<Place> result) {
     setState(() {
       suggestions = result;
     });
   }
 
-  void _onSearchError() {
+  void _onSuggestionsError() {
     setState(() {
       suggestions = List.empty();
     });
@@ -46,15 +54,22 @@ class _WeatherPlaceSearcherState extends State<WeatherPlaceSearcher> {
   @override
   Widget build(BuildContext context) {
     return WeatherPlaceSearchAutocomplete(
-        suggestions: suggestions,
-        onSearchChanged: _onSearchChanged,
-        onSuggestionSelected: widget._onSuggestionSelected);
+      suggestions: suggestions,
+      onSearchChanged: _onSearchChanged,
+      onSuggestionSelected: widget._onPlaceSelected,
+      onSearchSubmitted: _onSearchSubmitted,
+    );
   }
 
   void _onSearchChanged(String query) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      controller.searchPlaceWithQuery(query);
+      controller.searchPlacesWithQuery(query);
     });
+  }
+
+  void _onSearchSubmitted(String query) {
+    _debounceTimer?.cancel();
+    controller.getPlaceWithQuery(query);
   }
 }

@@ -22,7 +22,7 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
     controller = GetLocationController(
       onLocationGetted: (local) {
         setState(() {
-          _searchText = local.latitude.toString();
+          _searchText = "${local.latitude} ${local.longitude}";
           _locationError = false;
         });
       },
@@ -35,8 +35,11 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
     super.initState();
   }
 
-  void _onSearch(Place result) {
-    // TODO
+  void _onPlaceSelected(Place result) {
+    setState(() {
+      _searchText = "${result.latitude} ${result.longitude}";
+      _locationError = false;
+    });
   }
 
   @override
@@ -47,7 +50,7 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(56),
             child: WeatherAppBar(
-              onSearch: _onSearch,
+              onPlaceSelected: _onPlaceSelected,
               onGeolocationClicked: () {
                 controller.fetchUserLocation();
               },

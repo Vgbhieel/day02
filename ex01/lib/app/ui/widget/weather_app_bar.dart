@@ -3,14 +3,14 @@ import 'package:ex00/app/ui/widget/weather_place_search_text_field.dart';
 import 'package:flutter/material.dart';
 
 class WeatherAppBar extends StatelessWidget {
-  final Function(Place) _onSearch;
+  final Function(Place) _onPlaceSelected;
   final Function() _onGeolocationClicked;
 
   const WeatherAppBar({
     super.key,
-    required Function(Place) onSearch,
+    required Function(Place) onPlaceSelected,
     required Function() onGeolocationClicked,
-  })  : _onSearch = onSearch,
+  })  : _onPlaceSelected = onPlaceSelected,
         _onGeolocationClicked = onGeolocationClicked;
 
   @override
@@ -29,8 +29,8 @@ class WeatherAppBar extends StatelessWidget {
               Expanded(
                 flex: 1,
                 child: WeatherPlaceSearcher(
-                  onSuggestionSelected: (suggestion) {
-                    _onSearch(suggestion);
+                  onPlaceSelected: (place) {
+                    _onPlaceSelected(place);
                   },
                 ),
               ),
