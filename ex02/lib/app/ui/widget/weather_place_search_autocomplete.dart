@@ -79,7 +79,9 @@ class _WeatherPlaceSearchAutocompleteState
           ),
         );
       },
-      displayStringForOption: (option) => option.title,
+      displayStringForOption: (option) {
+        return buildDisplayString(option);
+      },
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text.isEmpty) {
           _list = List<Place>.empty();
@@ -94,7 +96,7 @@ class _WeatherPlaceSearchAutocompleteState
               itemBuilder: (context, index) {
                 Place item = mOptions[index];
                 return ListTile(
-                  title: Text(item.title),
+                  title: Text(buildDisplayString(item)),
                   onTap: () {
                     onSelected.call(item);
                     FocusScope.of(context).unfocus();
@@ -105,5 +107,21 @@ class _WeatherPlaceSearchAutocompleteState
       },
       onSelected: widget._onSuggestionSelected,
     );
+  }
+
+  String buildDisplayString(Place option) {
+    String displayString = option.name;
+    final String? region = option.region;
+    final String? coutry = option.country;
+
+    if (region != null) {
+      displayString = "$displayString, $region";
+    }
+
+    if (coutry != null) {
+      displayString = "$displayString, $coutry";
+    }
+
+    return displayString;
   }
 }

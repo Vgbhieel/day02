@@ -70,22 +70,26 @@ class SearchPlaceController {
     String country = e["country"] as String;
     String? region = e["admin1"] as String?;
     String? regionComplement = e["admin2"] as String?;
-    String title;
-
-    if (region != null) {
-      title = "$name, ${_getRegionData(region, regionComplement)}, $country";
-    } else {
-      title = name;
-    }
 
     return Place(
-      title: title,
-      latitude: e["latitude"] as double,
-      longitude: e["longitude"] as double,
-    );
+        name: name,
+        country: _getCountryData(name, country),
+        region: _getRegionData(region, regionComplement),
+        coordinates: {
+          (e["latitude"] as double).toString():
+              (e["longitude"] as double).toString()
+        });
   }
 
-  String _getRegionData(String region, String? regionComplement) {
+  String? _getCountryData(String name, String country) {
+    if (country == name) {
+      return null;
+    } else {
+      return country;
+    }
+  }
+
+  String? _getRegionData(String? region, String? regionComplement) {
     if (regionComplement != null) {
       return "$region, $regionComplement";
     } else {

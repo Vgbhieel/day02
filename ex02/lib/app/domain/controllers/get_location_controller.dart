@@ -1,9 +1,9 @@
+import 'package:ex00/app/domain/models/place.dart';
 import 'package:location/location.dart';
-import 'package:ex00/app/domain/models/local.dart';
 
 class GetLocationController {
   final Function() onPermissionDenied;
-  final Function(Local) onLocationGetted;
+  final Function(Place) onLocationGetted;
   GetLocationController({
     required this.onPermissionDenied,
     required this.onLocationGetted,
@@ -33,9 +33,12 @@ class GetLocationController {
     }
 
     locationData = await location.getLocation();
-    return onLocationGetted.call(Local(
-      latitude: locationData.latitude!,
-      longitude: locationData.longitude!,
-    ));
+    return onLocationGetted.call(Place(
+        name: "São Paulo",
+        region: "São Paulo",
+        country: "Brasil",
+        coordinates: {
+          locationData.latitude!.toString(): locationData.longitude!.toString()
+        }));
   }
 }

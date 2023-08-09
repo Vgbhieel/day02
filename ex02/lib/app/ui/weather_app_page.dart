@@ -1,8 +1,10 @@
 import 'package:ex00/app/domain/controllers/get_location_controller.dart';
 import 'package:ex00/app/domain/models/place.dart';
+import 'package:ex00/app/ui/today_weather_page.dart';
+import 'package:ex00/app/ui/weekly_weather_page.dart';
 import 'package:ex00/app/ui/widget/weather_app_bar.dart';
 import 'package:ex00/app/ui/widget/weather_bottom_navigation_bar.dart';
-import 'package:ex00/app/ui/widget/weather_category_page.dart';
+import 'package:ex00/app/ui/current_weather_page.dart';
 import 'package:flutter/material.dart';
 
 class WeatherAppPage extends StatefulWidget {
@@ -14,15 +16,15 @@ class WeatherAppPage extends StatefulWidget {
 
 class _WeatherAppPageState extends State<WeatherAppPage> {
   late GetLocationController controller;
-  String _searchText = '';
+  Place? _selectedPlace;
   bool _locationError = false;
 
   @override
   void initState() {
     controller = GetLocationController(
-      onLocationGetted: (local) {
+      onLocationGetted: (Place result) {
         setState(() {
-          _searchText = "${local.latitude} ${local.longitude}";
+          _selectedPlace = result;
           _locationError = false;
         });
       },
@@ -37,7 +39,7 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
 
   void _onPlaceSelected(Place result) {
     setState(() {
-      _searchText = "${result.latitude} ${result.longitude}";
+      _selectedPlace = result;
       _locationError = false;
     });
   }
@@ -78,17 +80,23 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
         );
       });
     } else {
-      return <Widget>[
-        WeatherCategoryPage(
-          categoryText: "Currently\n$_searchText",
-        ),
-        WeatherCategoryPage(
-          categoryText: "Today\n$_searchText",
-        ),
-        WeatherCategoryPage(
-          categoryText: "Weekly\n$_searchText",
-        ),
-      ];
+      if (_selectedPlace != null) {
+        return <Widget>[
+          CurrentWeatherPage(
+            place: _selectedPlace!,
+          ),
+          TodayWeatherPage(
+            place: _selectedPlace!,
+          ),
+          WeeklyWeatherPage(
+            place: _selectedPlace!,
+          ),
+        ];
+      }
+
+      return List.generate(3, (index) {
+        return Container();
+      });
     }
   }
 }
