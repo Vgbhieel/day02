@@ -26,14 +26,20 @@ class _WeeklyWeatherPageState extends State<WeeklyWeatherPage> {
   void initState() {
     super.initState();
     widget._isLoading = true;
-    _controller = WeeklyWeatherController(
-        onWeeklyWeatherSuccess: (weeklyWeather) {
-          setState(() {
-            _weeklyWeather = weeklyWeather;
-            widget._isLoading = false;
-          });
-        },
-        onWeeklyWeatherError: () {});
+    _controller =
+        WeeklyWeatherController(onWeeklyWeatherSuccess: (weeklyWeather) {
+      setState(() {
+        _weeklyWeather = weeklyWeather;
+        widget._isLoading = false;
+      });
+    }, onWeeklyWeatherError: () {
+      final snackBar = SnackBar(
+        backgroundColor: Theme.of(context).colorScheme.error,
+        content: Text('Ops, something went wrong. Please try again.',
+            style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    });
   }
 
   @override

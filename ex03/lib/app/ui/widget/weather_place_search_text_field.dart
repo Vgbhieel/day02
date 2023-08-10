@@ -49,6 +49,13 @@ class _WeatherPlaceSearcherState extends State<WeatherPlaceSearcher> {
     setState(() {
       suggestions = List.empty();
     });
+
+    final snackBar = SnackBar(
+      backgroundColor: Theme.of(context).colorScheme.error,
+      content: Text('Ops, something went wrong. Please try again.',
+          style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override

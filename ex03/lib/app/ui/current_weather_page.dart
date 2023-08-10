@@ -26,14 +26,20 @@ class _CurrentWeatherPageState extends State<CurrentWeatherPage> {
   void initState() {
     super.initState();
     widget._isLoading = true;
-    _controller = CurrentWeatherController(
-        onCurrentWeatherSuccess: (currentWeather) {
-          setState(() {
-            _currentWeather = currentWeather;
-            widget._isLoading = false;
-          });
-        },
-        onCurrentWeatherError: () {});
+    _controller =
+        CurrentWeatherController(onCurrentWeatherSuccess: (currentWeather) {
+      setState(() {
+        _currentWeather = currentWeather;
+        widget._isLoading = false;
+      });
+    }, onCurrentWeatherError: () {
+      final snackBar = SnackBar(
+        backgroundColor: Theme.of(context).colorScheme.error,
+        content: Text('Ops, something went wrong. Please try again.',
+            style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    });
   }
 
   @override
