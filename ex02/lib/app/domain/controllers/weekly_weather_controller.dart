@@ -15,7 +15,7 @@ class WeeklyWeatherController {
   })  : _onWeeklyWeatherSuccess = onWeeklyWeatherSuccess,
         _onWeeklyWeatherError = onWeeklyWeatherError;
 
-  Future<void> getCurrentWeather(Place place) async {
+  Future<void> getWeeklyWeather(Place place) async {
     try {
       final queryParameters = {
         'latitude': place.coordinates.keys.toList()[0],
@@ -40,12 +40,12 @@ class WeeklyWeatherController {
       List<double> maxTemperatures = _getMaxTemperatures(times, temperatures);
       List<double> minTemperatures = _getMinTemperatures(times, temperatures);
       List<String> weatherDescriptions =
-          List<int>.from(decodedResponse["temperature_2m"])
+          List<int>.from(decodedResponse["weathercode"])
               .map((e) => WeeklyWeather.parseWeatherCodeToWeatherDescription(e))
               .toList();
 
       WeeklyWeather currentWeather = WeeklyWeather(
-        dates: times,
+        dates: times.toSet().toList(),
         maxTemperatures: maxTemperatures,
         minTemperatures: minTemperatures,
         weatherDescriptions: weatherDescriptions,

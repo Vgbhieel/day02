@@ -1,22 +1,59 @@
+// ignore_for_file: must_be_immutable
+
+import 'package:ex00/app/domain/controllers/weekly_weather_controller.dart';
 import 'package:ex00/app/domain/models/place.dart';
+import 'package:ex00/app/domain/models/weekly_weather.dart';
 import 'package:flutter/material.dart';
 
-class WeeklyWeatherPage extends StatelessWidget {
+class WeeklyWeatherPage extends StatefulWidget {
   final Place _place;
+  bool _isLoading = true;
 
-  const WeeklyWeatherPage({
+  WeeklyWeatherPage({
     super.key,
     required Place place,
   }) : _place = place;
 
   @override
+  State<WeeklyWeatherPage> createState() => _WeeklyWeatherPageState();
+}
+
+class _WeeklyWeatherPageState extends State<WeeklyWeatherPage> {
+  late WeeklyWeatherController _controller;
+  late WeeklyWeather _weeklyWeather;
+
+  @override
+  void initState() {
+    super.initState();
+    widget._isLoading = true;
+    _controller = WeeklyWeatherController(
+        onWeeklyWeatherSuccess: (weeklyWeather) {
+          setState(() {
+            _weeklyWeather = weeklyWeather;
+            widget._isLoading = false;
+          });
+        },
+        onWeeklyWeatherError: () {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (widget._isLoading) {
+      _controller.getWeeklyWeather(widget._place);
+    }
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: _getInfoWidgets(_place, context),
+          children: !widget._isLoading
+              ? _getInfoWidgets(widget._place, context)
+              : [
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                ],
         ),
       ),
     );
@@ -25,33 +62,34 @@ class WeeklyWeatherPage extends StatelessWidget {
   List<Widget> _getInfoWidgets(Place place, BuildContext context) {
     List<Widget> list = [];
     list.add(Text(
-      _place.name,
+      widget._place.name,
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.displayLarge,
     ));
-    if (_place.region != null) {
+    if (widget._place.region != null) {
       list.add(Text(
-        _place.region!,
+        widget._place.region!,
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.displayLarge,
       ));
     }
-    if (_place.country != null) {
+    if (widget._place.country != null) {
       list.add(Text(
-        _place.country!,
+        widget._place.country!,
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.displayLarge,
       ));
     }
+
     for (int i = 1; i <= 7; i++) {
+      var index = i - 1;
       list.add(Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text(
-              '${i.toString().padLeft(2, '0')}/${i.toString().padLeft(2, '0')}/23'),
-          Text('0${i}C°'),
-          Text('${i}0C°'),
-          const Text('Sunny'),
+          Text(_weeklyWeather.dates[index]),
+          Text('${_weeklyWeather.minTemperatures[index]}C°'),
+          Text('${_weeklyWeather.maxTemperatures[index]}C°'),
+          Text(_weeklyWeather.weatherDescriptions[index]),
         ],
       ));
     }
