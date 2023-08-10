@@ -34,9 +34,9 @@ class GetLocationController {
 
     locationData = await location.getLocation();
     return onLocationGetted.call(Place(
-        name: "São Paulo",
-        region: "São Paulo",
-        country: "Brasil",
+        name: "Current location",
+        region: null,
+        country: null,
         coordinates: {
           locationData.latitude!.toString(): locationData.longitude!.toString()
         }));
