@@ -20,6 +20,12 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    context.read<LocationBloc>().add(FetchLocation());
+  }
+
+  @override
   void dispose() {
     context.read<LocationBloc>().close();
     super.dispose();
