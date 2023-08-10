@@ -34,6 +34,7 @@ class _WeatherAppPageState extends State<WeatherAppPage> {
         });
       },
     );
+    controller.fetchUserLocation();
     super.initState();
   }
 
